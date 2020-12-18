@@ -23,15 +23,9 @@ char *ordena (char freq[]) {
         else i++;
     }
 
-    for ( ; freq[i]!='0'; i++) {
-        for (j=i; freq[j]!='@'; j++) {
-            while (freq[i]!=';') {
-                char str[50]; //tam?
-                //char str[50] = ""; //(?)
-                strcpy (str, freq[i]);
-                i++;
-            }
-
+    for ( ; freq[i]!='0'; i++) { //percorre o array todo
+        for (j=i; freq[j]!='@'; j++) { //percorre cada bloco
+            if (valor(freq,j) < valor )
         }
     }
 
@@ -40,24 +34,22 @@ char *ordena (char freq[]) {
 
 //retira o valor da frequência e transforma-o num inteiro
 int valor (char freq[], int ind) {
+    int n = 0; //nº de carateres
     int i;
-    char str[50];
+    char *str;
 
-    for (i=ind; freq[i]!=';'; i++) {
-        strcpy(str, freq[i]); //strtol
-    }
+    for (i=ind; freq[i]!=';'; i++) n++;
+    strncpy (str, &freq[i-n],n);
     int x = atoi(str);
 
-    return x;
-    
+    return x;    
 } 
 
 int main () {
     int k;
-    char *s;
-    s = "@R@2@57444@1322;335;";
+    char s[] = "@R@2@57444@1322;335;";
     k = valor(s,11);
-    printf ("Resultado : %i\n", k);
+    printf ("Resultado: %i\n", k);
 
     return 0;
 }
