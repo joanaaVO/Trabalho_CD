@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+//ATENÇÃO AOS CASOS EM QUE O VALOR É REPETIDO (;;)
+
 //ordenar por ordem decrescente os índices de cada bloco 
 //dois ciclos : para cada bloco e dentro de cada bloco
 //numero de blocos = freq[3];
@@ -21,15 +23,29 @@ typedef struct inf {
     struct inf *prox;
 } *Inf;
 
+//retira o valor da frequência e transforma-o num inteiro
+int valor (char *freq, int i, int n) {
+    char *str;
+    char *ptr;
+    int x;
+
+    strncpy (str, freq+i,n);
+    x = strtol(str, &ptr, 10);
+    //int x = atoi(str);
+
+    return x;    
+} 
+
 //cria uma lista nova com os valores das freq de cada bloco
-int *freqsbloco (char freq[], int ind) { //indíce do bloco (número de @-1 a percorrer após os 4 primeiros)
+int *freqsbloco (char *freq, int ind) { //indíce do bloco (número de @-1 a percorrer após os 4 primeiros)
     int a = 4 + ind - 1; //número de @ a percorrer (4 iniciais + ind - 1)
     int i = 0; //percorrer os blocos
     int j; //percorrer as frequências dos símbolos de cada bloco
     int *l; 
+    int k=0; //índice para percorrer a lista a retornar
     int n; //nº de caracteres da frequência
 
-    while (a>0) { //serve para avançar com o array até ao sítio onde começa o bloco 
+    while (a>0) { //serve para avançar com o array até ao sítio onde começam os blocos 
         if (freq[i]=='@') {
             a--;
             i++;
@@ -40,20 +56,11 @@ int *freqsbloco (char freq[], int ind) { //indíce do bloco (número de @-1 a pe
     for ( ; freq[i]!= '@'; i+=n) { //percorre o bloco
         n = 0;
         for (j=i; freq[j]!=';'; j++) n++; //percorre cada frequência
-        strcat(l, valor(freq,j,n));
+        l[k++] = valor(freq,j,n);
         }
         return l; 
 }
 
-//retira o valor da frequência e transforma-o num inteiro
-int valor (char freq[], int i, int n) {
-    char *str;
-
-    strncpy (str, &freq[i],n);
-    int x = atoi(str);
-
-    return x;    
-} 
 
 char *calcular_codigos_SF (char freq[]) {
     char *codes;
@@ -88,10 +95,6 @@ char *calcular_codigos_SF (char freq[]) {
         for(j= divAnt+1; j<=div; j++) strcat(codes,'0');
         for (j=div+1; j<=end; j++) strcat(codes,'1');
 
-
-
-
-
     }
 
 //função para ordenar as probabilidades (decrescente)
@@ -119,23 +122,37 @@ char *calcular_codigos_SF (char freq[]) {
            //fazer uma função para calcular a melhor divisão das frequencias 
 }
 
+
 // calcular a melhor divisao das frequencias 
     void melhorDiv(int a[],int N){
         int i;
-        int arr b;
-        int meio=length N/2;
+        int b;
+        int meio= length (N/2);
         for(i=0;i<N-1;i++){
-            if(sum a[i..meio]==sum a[meio+1..N]){
+            if(sum (a[i..meio]) ==sum (a[meio+1..N])){
                 while(i<=meio){
                     b=insert(a,i); //acho que ha uma função c este nome caso n haja faço a 
-                } //falta acabar 
+                } //falta acabar
+            }
+        }
+} 
                 
             
            
 int main () {
     int k;
-    char s[] = "@R@2@57444@1322;335;";
+    int *l;
+    char *s = "@R@2@57444@1322;335;456@1620@19;21;6@0";
+
+    //strncpy(l,s+11,4);
+    //printf ("%s\n", l);
     k = valor(s,11,4);
+    //l = freqsbloco(s,1);
+    //printf ("%i\n", l[0]);
+    //int loop;
+    
+    //for(loop = 0; loop < sizeof(l); loop++) printf("%i\n", l[loop]);
+
     printf ("Resultado: %i\n", k);
 
     return 0;
