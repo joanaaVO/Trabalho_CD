@@ -94,10 +94,44 @@ char *calcular_codigos_SF (char freq[]) {
 
     }
 
+//função para ordenar as probabilidades (decrescente)
+ ordenaP(int a[],int N){
+     int i,j;
+     for(i=0;i<N-1;i++){
+         for(j=i;j<N-1;j++){
+             if(a[i]<a[j])
+                 swap(a,i,j);
+         }
+     }
     
-
+// função para dividir as probabilidades 
+   void divideP(int a [],int N){
+       int pt=sum a[i];
+       int i,meio ,arr b,tmp;
+       meio=length N/2;
+       for(i=0;i<N-1;i++){
+           if(a[i]>=0,5 && pt=1){ 
+               tmp=a[i];
+               removeelem(a,i,N);
+           b[0]=tmp;
+           }
+       else {
+           //fazer uma função para calcular a melhor divisão das frequencias 
 }
 
+// calcular a melhor divisao das frequencias 
+    void melhorDiv(int a[],int N){
+        int i;
+        int arr b;
+        int meio=length N/2;
+        for(i=0;i<N-1;i++){
+            if(sum a[i..meio]==sum a[meio+1..N]){
+                while(i<=meio){
+                    b=insert(a,i); //acho que ha uma função c este nome caso n haja faço a 
+                } //falta acabar 
+                
+            
+           
 int main () {
     int k;
     char s[] = "@R@2@57444@1322;335;";
