@@ -24,10 +24,10 @@ typedef struct inf {
 } *Inf;
 
 //retira o valor da frequência e transforma-o num inteiro
-int valor (char *freq, int i, int n) {
+long valor (char *freq, int i, int n) {
     char *str;
     char *ptr;
-    int x;
+    long x;
 
     strncpy (str, freq+i,n);
     x = strtol(str, &ptr, 10);
@@ -37,11 +37,11 @@ int valor (char *freq, int i, int n) {
 } 
 
 //cria uma lista nova com os valores das freq de cada bloco
-int *freqsbloco (char *freq, int ind) { //indíce do bloco (número de @-1 a percorrer após os 4 primeiros)
+long *freqsbloco (char *freq, int ind) { //indíce do bloco (número de @-1 a percorrer após os 4 primeiros)
     int a = 4 + ind - 1; //número de @ a percorrer (4 iniciais + ind - 1)
     int i = 0; //percorrer os blocos
     int j; //percorrer as frequências dos símbolos de cada bloco
-    int *l; 
+    long *l; 
     int k=0; //índice para percorrer a lista a retornar
     int n; //nº de caracteres da frequência
 
@@ -52,17 +52,19 @@ int *freqsbloco (char *freq, int ind) { //indíce do bloco (número de @-1 a per
         }
         else i++;
     }
-
+ 
     for ( ; freq[i]!= '@'; i+=n) { //percorre o bloco
         n = 0;
-        for (j=i; freq[j]!=';'; j++) n++; //percorre cada frequência
-        l[k++] = valor(freq,j,n);
+        if (freq[i+1] == ';') l[k++] = l[k-1]; //caso a frequência do valor em que nos encontramos seja igual à anterior (CASO ;;)
+        else {
+            for (j=i; freq[j]!=';'; j++) n++; //percorre cada frequência
+            l[k++] = valor(freq,j,n);  
         }
         return l; 
 }
 
 
-char *calcular_codigos_SF (char freq[]) {
+/*char *calcular_codigos_SF (char freq[]) {
     char *codes;
     int i = 0;
     int j;
@@ -96,7 +98,7 @@ char *calcular_codigos_SF (char freq[]) {
         for (j=div+1; j<=end; j++) strcat(codes,'1');
 
     }
-
+*/
 //função para ordenar as probabilidades (decrescente)
  ordenaP(int a[],int N){
      int i,j;
@@ -140,7 +142,7 @@ char *calcular_codigos_SF (char freq[]) {
             
            
 int main () {
-    int k;
+    long k;
     int *l;
     char *s = "@R@2@57444@1322;335;456@1620@19;21;6@0";
 
@@ -153,7 +155,7 @@ int main () {
     
     //for(loop = 0; loop < sizeof(l); loop++) printf("%i\n", l[loop]);
 
-    printf ("Resultado: %i\n", k);
+    printf ("Resultado: %ld\n", k);
 
     return 0;
 }
