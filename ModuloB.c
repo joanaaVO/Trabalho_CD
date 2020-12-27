@@ -137,15 +137,31 @@ void divideP(int a [], int N){
     void melhorDiv(int a[],int N){
         int i;
         int b;
+        int dif,melhordif;
+        int soma1,soma2;
         int meio= length (N/2);
         for(i=0;i<N-1;i++){
             if(sum (a[i..meio]) ==sum (a[meio+1..N])){
                 while(i<=meio){
                     b=insert(a,i); //acho que ha uma função c este nome caso n haja faço a 
-                } //falta acabar
+                }
+            }
+            else {
+            	dif=sum(a[i..N]);
+              if(a[i]<sum(a[i+1..N])){
+              	soma1=a[i];
+              	soma2=sum(a[i+1..N]);
+              	melhordif=abs(soma1-soma2);
+              if(dif<melhordif){
+                 melhordif=dif;
+                 soma1=a[i]+a[i+1];
+                 soma2= sum(a[i+2]);
+              }
+              }
+                
             }
         }
-} 
+}
 
 
 //retorna uma string que contém o tamanho de um dado bloco
