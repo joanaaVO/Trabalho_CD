@@ -23,7 +23,7 @@ typedef struct inf {
     struct inf *prox;
 } *Inf;
 
-//retira o valor da frequência e transforma-o num inteiro
+//retira o valor da frequência e transforma-o num long (inteiro)
 long valor (char *freq, int i, int n) {
     char *str;
     char *ptr;
@@ -31,14 +31,13 @@ long valor (char *freq, int i, int n) {
 
     strncpy (str, freq+i,n);
     x = strtol(str, &ptr, 10);
-    //int x = atoi(str);
 
     return x;    
 } 
 
 //cria uma lista nova com os valores das freq de cada bloco
 long *freqsbloco (char *freq, int ind) { //indíce do bloco (número de @-1 a percorrer após os 4 primeiros)
-    int a = 4 + ind - 1; //número de @ a percorrer (4 iniciais + ind - 1)
+    int a = (ind + 1)*2; //número de @ a percorrer 
     int i = 0; //percorrer os blocos
     int j; //percorrer as frequências dos símbolos de cada bloco
     long *l; 
@@ -58,11 +57,11 @@ long *freqsbloco (char *freq, int ind) { //indíce do bloco (número de @-1 a pe
         if (freq[i+1] == ';') l[k++] = l[k-1]; //caso a frequência do valor em que nos encontramos seja igual à anterior (CASO ;;)
         else {
             for (j=i; freq[j]!=';'; j++) n++; //percorre cada frequência
-            l[k++] = valor(freq,j,n);  
+            l[k++] = valor(freq,i,n);  
         }
-        return l; 
+    }
+    return l;
 }
-
 
 /*char *calcular_codigos_SF (char freq[]) {
     char *codes;
@@ -99,24 +98,33 @@ long *freqsbloco (char *freq, int ind) { //indíce do bloco (número de @-1 a pe
 
     }
 */
-//função para ordenar as probabilidades (decrescente)
- ordenaP(int a[],int N){
+
+//troca o conteúdo de dois elementos do array
+void swap (long v[], int i, int j){
+	int temp = v[i];
+	v[i] = v[j];
+    v[j] = temp;
+}
+
+//ordena as probabilidades por ordem decrescente
+void ordena (long a[], int N) {
      int i,j;
-     for(i=0;i<N-1;i++){
-         for(j=i;j<N-1;j++){
-             if(a[i]<a[j])
-                 swap(a,i,j);
+
+     for(i=0; i<N-1; i++) {
+         for(j=i+1; j<N; j++) {
+             if(a[i] < a[j]) swap(a,i,j);
          }
      }
+}
     
 // função para dividir as probabilidades 
-   void divideP(int a [],int N){
-       int pt=sum a[i];
+void divideP(int a [], int N){
+       int pt = sum (a[i]);
        int i,meio ,arr b,tmp;
-       meio=length N/2;
-       for(i=0;i<N-1;i++){
-           if(a[i]>=0,5 && pt=1){ 
-               tmp=a[i];
+       meio = length (N/2);
+       for(i=0; i<N-1; i++){
+           if(a[i] >= 0.5 && pt == 1){ 
+               tmp = a[i];
                removeelem(a,i,N);
            b[0]=tmp;
            }
@@ -138,13 +146,72 @@ long *freqsbloco (char *freq, int ind) { //indíce do bloco (número de @-1 a pe
             }
         }
 } 
-                
+
+
+//retorna uma string que contém o tamanho de um dado bloco
+char *tamanhoB (char *freq, int ind) {
+    int a = 2 * ind + 1; //num de @ que terá de passar
+    int i = 0;
+    int k = 0;
+    char *tam;
+    
+    while (a>0) { //percorre o array até ao sítio onde se encontra o tamanho do bloco
+        if (freq[i]=='@') {
+            a--;
+            i++;
+        }
+        else i++;
+    }
+
+    while (freq[i]!='@') tam[k++] = freq[i];
+
+    return tam;
+}
+
+//função principal que retorna o conteúdo do ficheiro .cod
+char *cod (char *freq) {
+    char *final; //string que vai ser retornada
+    int i = 0;
+    int b = 1; //indicador do bloco
+    int blocos = freq[3];
+
+    while (blocos > 0) {
+        strcat (final)    
+    }
+
+
+
+}
+
+/*int main () {
+    FILE *fp;
+    char *command;
+    char *filename;
+    char *c = "shafa ";
+
+    printf ("Nome do ficheiro: ");
+    scanf ("%s", str); 
+
+    fp = fopen (filename, "r");
+
+    c = c + filename + " -m t";
+
+    strcpy(command, "shafa" + "-m t");
+    system(command);
+
+    return 0;
+}
+*/
             
            
 int main () {
     long k;
-    int *l;
+    char *l;
     char *s = "@R@2@57444@1322;335;456@1620@19;21;6@0";
+
+    //char *ptr;
+    //strncpy (l, s+11, 4);
+    //k = strtol(l, &ptr, 10); 
 
     //strncpy(l,s+11,4);
     //printf ("%s\n", l);
@@ -155,7 +222,7 @@ int main () {
     
     //for(loop = 0; loop < sizeof(l); loop++) printf("%i\n", l[loop]);
 
-    printf ("Resultado: %ld\n", k);
+    printf ("Resultado:%ld\n", k);
 
     return 0;
 }
