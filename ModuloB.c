@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 //troca o conteúdo de dois elementos do array
 void swap (long v[], int i, int j) {
@@ -52,120 +53,34 @@ void freqsbloco (char *freq, int ind, long l[]) { //indíce do bloco (número de
     ordena(l,256); //número de símbolos é sempre 256
 }
 
-/*char *calcular_codigos_SF (long ord[]) {
-    char *codes;
-    int i = 0;
-    int j;
-    int end = strlen(freq)-1;
-    int div;
-    int divAnt;
-
-    for (i=0; ... ; i++) {
-        div = calcular_melhor_divisao(freq,i,end);
-        for (j=i; j<=div; j++) strcat(codes,'0');
-        for (j=div+1; j<=end; j++) strcat(codes,'1');
-        j=i; //(?)
-        divAnt = div;
-
-        while (j!=divAnt) { //ou div?
-            if (divAnt > div) { //>= (?)
-                divAnt = div; //guarda a divisão anterior
-                div = calcular_melhor_divisao(freq,j,div);
-            }
-            else divAnt = end;
-            int k;
-            for (k=j; k<=div; k++) strcat(codes,'0');
-            for (k=div+1; k<=divAnt; k++) strcat(codes,'1');
-            // assim j vai ser sempre !=div ?? v
-            div = calcular_melhor_divisao(freq,divAnt+1,end); //(?)
-            j = divAnt+1;
-            //colocar isto no início fora do ciclo ? e fazer as devidas alterações (??)
-        }
-        div = calcular_melhor_divisao(freq,divAnt+1,end);
-        for(j= divAnt+1; j<=div; j++) strcat(codes,'0');
-        for (j=div+1; j<=end; j++) strcat(codes,'1');
-
-    }
-*/
-
 //calcula a soma das frequências entre dois índices
 long sum (long v[], int inicio, int fim) {
     int i;
     int soma=0;
 
-    for (i=inicio; i<fim; i++) soma+=v[i];
+    for (i=inicio; i<=fim; i++) soma+=v[i];
 
     return soma;
-}
-  
-//divide as probabilidades 
-void divideP (int a [], int N) {
-    int i = 0;
-    int pt = sum (a,i,N);
-    int meio = length (N/2);
-    int tmp;
-    int b [50];
-    
-    for(i=0; i<N-1; i++){
-        if(a[i] >= 0.5 && pt == 1){ 
-            tmp = a[i];
-            removeelem(a,i,N);
-            b[0]=tmp;
-        }
-        else {
-           //fazer uma função para calcular a melhor divisão das frequencias 
-        }
-    }
-}
-
-//calcula a melhor divisão das frequências 
-int melhorDiv (long a[],int N) {
-    int div;
-    int i = 0;
-    int b;
-    int dif, mindif;
-    dif = mindif = sum(a,i,N);
-    int soma1, soma2;
-    int meio = length (N/2); //meio vai ser sempre o mesmo (?)
-    
-    for (i=0; i<N; i++) {
-        if (a[i] == sum )
-        if (sum (a,i,meio) == sum (a,meio+1,N)) {
-            while (i <= meio) {
-                b = insert(a,i); //acho que ha uma função c este nome caso n haja faço a 
-            }
-        }
-        else {
-            dif = sum(a,i,N);
-            if (a[i] < sum(a,i+1,N)) {
-                soma1 = a[i];
-                soma2 = sum(a,i+1,N);
-              	mindif = abs(soma1-soma2);
-                  if (dif < mindif) {
-                      mindif = dif;
-                      soma1 = a[i]+a[i+1];
-                      soma2 = sum(a,i+2,N);
-                  }
-            }
-            else divideP(a,i); //?               
-        }
-    }
-    return div;
 }
 
 int calcular_melhor_divisao (long ord[],int i,int j) {
     int div = i;
     long total,mindif,dif;
     total = mindif = dif = sum(ord,i,j);
+    //printf("mindif:%ld ",mindif);
     long g1 = 0;
     do {
         g1 = g1 + ord[div]; //soma acumulada dos sucessivos elementos
         dif = abs(2*g1-total);
+        //printf("dif:%ld ",dif);
         if (dif<mindif) { 
             div = div+1;
             mindif = dif;
         }
         else dif = mindif+1; 
+        //printf("dif2:%ld ",dif);
+        //printf("mindif2:%ld ",mindif);
+        //printf("div:%i\n",div);
     } while (dif == mindif); //até (dif!=mindif)
     return div-1; //calcular_melhor_divisão=div-1
 } 
@@ -177,10 +92,10 @@ void calcular_codigos_SF(long ord[],char codes[],int start,int end) {
     char one = '1';
     if (start!=end) {
         div = calcular_melhor_divisao(ord,start,end);
-        //printf("div: %i\n", div);
+        printf("div: %i\n", div);
         for (i=0; i<=div-start; i++) strncat (codes, &zero, 1); //add_bit_to_code('0',codes,start,div);
         for (i=0; i<=end-(div+1); i++) strncat(codes, &one, 1); //add_bit_to_code('1',codes,div+1,end);
-        //printf("%s\n", codes);
+        printf("%s\n", codes);
         calcular_codigos_SF(ord,codes,start,div);
         calcular_codigos_SF(ord,codes,div+1,end);
     }
@@ -211,21 +126,29 @@ char *cod (char *freq) {
     int k; //índice que percorre a lista final
     int i = 0;
     int b = 1; //indicador do bloco
-    int bloco = 1;
+    long bloco = 1;
     long l[257];
     char *t;
+    char a = '@';
+    char zero = '0';
+    char *codes;
+    char *ptr;
 
     while (i <= 4) final[k++] = freq[i++];
 
-    while (bloco <= freq[3]) { //repete o processo para todos os blocos
+    //ALGURES AQUI COLOCAR UMA FUNÇÃO PARA ADICONAR ; ENTRE OS CÓDIGOS E TER ATENÇÃO AOS CASOS QUE SÃO IGUAIS (;;) ??
+    //CASO A FREQUÊNCIA DOS SIMBOLOS SEJA 0 APARECE ;; NO FICHEIRO DE SAÍDA
+    while (bloco <= strtol(freq+3, &ptr, 10)) { //repete o processo para todos os blocos
         tamanhoB(freq,bloco,t);
         strcat (final, t); //copiar o tam do bloco diretamente do ficheiro de entrada
-        strcat (final, "@"); //??
+        strncat (final,&a,1); //coloca um @ a seguir do tamanho do bloco
         freqsbloco (freq,bloco,l);
-        //strcat (final, calcular_codigos_SF(l));
-        strcat (final, "@"); //??  
+        calcular_codigos_SF(l,codes,0,255); //255?
+        strcat (final, codes); //não vai ser bem a codes
+        strncat (final,&a,1); //coloca um @ no fim do bloco
+        bloco++;  
     }
-    strcat(final,"0"); //adiciona o caracter "0" no fim
+    strncat(final,&zero,1); //adiciona o caracter "0" no fim
     //último caracter '\0' ?
 }
 
@@ -238,6 +161,10 @@ char *cod (char *freq) {
     int j = 0;
     char *saida;
     char *conteudo;
+    char *ptr;
+    clock_t start, end, total;
+
+    start = clock();
 
     scanf ("%s", command); 
 
@@ -253,28 +180,38 @@ char *cod (char *freq) {
     novo = fopen(strcat(filename,".cod"), "w"); //cria um novo ficheiro (.cod) (wb?)
     fprintf(novo, saida); //coloca no novo ficheiro a string resultante da execução do módulo
 
+    end = clock();
+    total = (long int) ((end-start) / CLOCKS_PER_SEC) * 1000);
+
+    printf("Filipa Rebelo, a90234, Joana Oliveira, a87956, MIEI-CD, DATA\n");
+    printf("Módulo: t (cálculo dos códigos dos símbolos)\n");
+    printf("Número de blocos: \n", strtol(conteudo+3,&ptr,10));
+    printf("Tamanho dos blocos analisados no ficheiro de símbolos: %s bytes\n");
+    printf("Tempo de execução do módulo (milissegundos): %lu\n", total);
+    printf("Ficheiro gerado: %s", novo); //novo?
+
     fclose(fp);
     fclose(novo);
 
     return 0;
 }
 */
-
                       
 int main () {
     long k;
-    //long l[10] = {1/2,1/12,1/12,1/12,1/16,1/16,1/16,1/16};
-    long l[5] = {3,2,2,2,1};
+    //long l[8] = {1/2,1/12,1/12,1/12,1/16,1/16,1/16,1/16};
+    long l[4] = {5,3,1,1};
+    long ex[8] = {24,4,4,4,3,3,3,3};
     char *t;
     char *s = "@R@2@57444@1322;;335;;456@1620@19;21;6@0";
     int div;
 
-    calcular_codigos_SF(l,t,0,7);
+    calcular_codigos_SF(ex,t,0,7);
 
     //tamanhoB(s,2,t);
     printf("%s\n",t);
 
-    //div = calcular_melhor_divisao(l,4,7);
+    //div = calcular_melhor_divisao(l,0,3);
     //printf("Div: %i\n", div); 
   
     // print string 
