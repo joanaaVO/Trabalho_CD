@@ -85,19 +85,43 @@ int calcular_melhor_divisao (long ord[],int i,int j) {
     return div-1; //calcular_melhor_divisão=div-1
 } 
 
-void calcular_codigos_SF(long ord[],char codes[],int start,int end) {
+int calcular_codigos_SF(long ord[],char codes[],int start,int end,int divisoes[],int k) {
     int div;
     int i;
     char zero = '0';
     char one = '1';
     if (start!=end) {
         div = calcular_melhor_divisao(ord,start,end);
+        printf("k antes: %i\n", k);
+        divisoes[k++] = div;
+        printf("k depois: %i\n", k);
+        printf("div[k]: %i\n", divisoes[k-1]);
         printf("div: %i\n", div);
         for (i=0; i<=div-start; i++) strncat (codes, &zero, 1); //add_bit_to_code('0',codes,start,div);
         for (i=0; i<=end-(div+1); i++) strncat(codes, &one, 1); //add_bit_to_code('1',codes,div+1,end);
         printf("%s\n", codes);
-        calcular_codigos_SF(ord,codes,start,div);
-        calcular_codigos_SF(ord,codes,div+1,end);
+        k = calcular_codigos_SF(ord,codes,start,div,divisoes,k);
+        k = calcular_codigos_SF(ord,codes,div+1,end,divisoes,k);
+    }
+    return k;
+}
+
+void agrupar (char cod[],int divs [],char **codsimb,int end) {
+    int i; //percorre os símbolos
+    int start;
+    //int j; //percorre a codificação de cada símbolo
+    int k = 0; //percorre cods
+    int n; //percorre divs
+
+    while (cod[k]!='\0') {
+        start = divs[n];
+        for(i=start; i!=end; i++) {
+            char c = cod[k];
+            strncat(codsimb[i],&c,1);
+            k++;
+            printf("%s\n",codsimb[i]);
+        }
+        n++;
     }
 }
 
@@ -143,7 +167,7 @@ char *cod (char *freq) {
         strcat (final, t); //copiar o tam do bloco diretamente do ficheiro de entrada
         strncat (final,&a,1); //coloca um @ a seguir do tamanho do bloco
         freqsbloco (freq,bloco,l);
-        calcular_codigos_SF(l,codes,0,255); //255?
+        //calcular_codigos_SF(l,codes,0,255); //255?
         strcat (final, codes); //não vai ser bem a codes
         strncat (final,&a,1); //coloca um @ no fim do bloco
         bloco++;  
@@ -203,13 +227,23 @@ int main () {
     long l[4] = {5,3,1,1};
     long ex[8] = {24,4,4,4,3,3,3,3};
     char *t;
+    char *simb;
     char *s = "@R@2@57444@1322;;335;;456@1620@19;21;6@0";
     int div;
+    int cont;
+    int divs [7];
+    char **codsimb;
+    char *codigos = "01111111000111101101001101";
 
-    calcular_codigos_SF(ex,t,0,7);
+    //cont = calcular_codigos_SF(ex,t,0,7,divs,0);
+    //printf("%i\n", cont);
+    //divs[cont] = '\0';
+    agrupar(codigos,divs,codsimb,8);
+    //printf("%i\n", divs[4]);
+    //agrupar(t,ex,simb,0,7);
 
     //tamanhoB(s,2,t);
-    printf("%s\n",t);
+    //printf("%s\n",t);
 
     //div = calcular_melhor_divisao(l,0,3);
     //printf("Div: %i\n", div); 
@@ -217,10 +251,9 @@ int main () {
     // print string 
     //printf("Appended String: %s\n", str); 
 
-    /*freqsbloco(s,1,l);
-    int loop;   
-    for(loop = 0; loop < 5; loop++) printf("%ld ", l[loop]);
-    */
+    //freqsbloco(s,1,l);
+    //int loop;   
+    //for(loop = 0; loop < 6; loop++) printf("%i ", divs[loop]);
 
     return 0;
 }
