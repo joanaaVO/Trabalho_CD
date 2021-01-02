@@ -3,6 +3,8 @@
 #include <string.h>
 #include <time.h>
 
+#define MAX 1000
+
 //troca o conteúdo de dois elementos do array
 void swap (long v[], int i, int j) {
 	int temp = v[i];
@@ -50,7 +52,18 @@ void freqsbloco (char *freq, int ind, long l[]) { //indíce do bloco (número de
             l[k++] = strtol (freq+i,&ptr,10);
         }
     }
+    l[k] = '\0';
     ordena(l,256); //número de símbolos é sempre 256
+}
+
+//remove as frequências iguais a 0
+void removeFreq (long ord[]) {
+    int i;
+    int j = 0;
+
+    for(i=0; ord[i]!='\0'; i++) {
+        if (ord[i] != 0) ord[j++] = ord[i];
+    }
 }
 
 //calcula a soma das frequências entre dois índices
@@ -72,15 +85,11 @@ int calcular_melhor_divisao (long ord[],int i,int j) {
     do {
         g1 = g1 + ord[div]; //soma acumulada dos sucessivos elementos
         dif = abs(2*g1-total);
-        //printf("dif:%ld ",dif);
         if (dif<mindif) { 
             div = div+1;
             mindif = dif;
         }
         else dif = mindif+1; 
-        //printf("dif2:%ld ",dif);
-        //printf("mindif2:%ld ",mindif);
-        //printf("div:%i\n",div);
     } while (dif == mindif); //até (dif!=mindif)
     return div-1; //calcular_melhor_divisão=div-1
 } 
@@ -106,23 +115,35 @@ int calcular_codigos_SF(long ord[],char codes[],int start,int end,int divisoes[]
     return k;
 }
 
-void agrupar (char cod[],int divs [],char **codsimb,int end) {
-    int i; //percorre os símbolos
-    int start;
-    //int j; //percorre a codificação de cada símbolo
-    int k = 0; //percorre cods
-    int n; //percorre divs
+void codigo_simbolo (char cod[], int divs[], char codsimb[MAX][MAX]) {
+    int i = 0; //percorre cod
+    int z; //percorre cod para contar os zeros
+    int j = 0; //percorre divs
+    int k = 0; //percorrer codsimb
+    int zeros;
+    char c;
 
-    while (cod[k]!='\0') {
-        start = divs[n];
-        for(i=start; i!=end; i++) {
-            char c = cod[k];
-            strncat(codsimb[i],&c,1);
+    for (int l=0; l<MAX; l++) memset(codsimb[l], '\0', sizeof(codsimb[l])); //limpa a memória
+
+    while (cod[i]!='\0') {
+        zeros = 0;
+        for (z=i; cod[z]!= '1'; z++) zeros++;
+        k=divs[j]-zeros+1;
+        while (cod[i]!='1') { //adicionar os 0s
+            c = cod[i]; 
+            strncat(codsimb[k],&c,1);
             k++;
-            printf("%s\n",codsimb[i]);
+            i++;
         }
-        n++;
+        while (cod[i]!='0' && cod[i]!='\0') { //adicionar os 1s
+            c = cod[i];
+            strncat(codsimb[k],&c,1);
+            k++;
+            i++;
+        }
+        j++; //avança com o array das divs
     }
+    //for(int n=0; n<8; n++) printf("%s\n",codsimb[n]);
 }
 
 //coloca numa string 'tam' o tamanho de um dado bloco
@@ -157,17 +178,22 @@ char *cod (char *freq) {
     char zero = '0';
     char *codes;
     char *ptr;
+    char codesimb[MAX][MAX];
+    int divs[MAX];
 
     while (i <= 4) final[k++] = freq[i++];
 
     //ALGURES AQUI COLOCAR UMA FUNÇÃO PARA ADICONAR ; ENTRE OS CÓDIGOS E TER ATENÇÃO AOS CASOS QUE SÃO IGUAIS (;;) ??
     //CASO A FREQUÊNCIA DOS SIMBOLOS SEJA 0 APARECE ;; NO FICHEIRO DE SAÍDA
     while (bloco <= strtol(freq+3, &ptr, 10)) { //repete o processo para todos os blocos
-        tamanhoB(freq,bloco,t);
+        tamanhoB (freq,bloco,t);
         strcat (final, t); //copiar o tam do bloco diretamente do ficheiro de entrada
         strncat (final,&a,1); //coloca um @ a seguir do tamanho do bloco
         freqsbloco (freq,bloco,l);
-        //calcular_codigos_SF(l,codes,0,255); //255?
+        removeFreq (l); //remove as frequências iguais a 0
+        calcular_codigos_SF(l,codes,0,255,divs,0);
+        codigo_simbolo(codes,divs,codesimb);
+        //for (int j=0; codesimb[j]!='\0';j++) 
         strcat (final, codes); //não vai ser bem a codes
         strncat (final,&a,1); //coloca um @ no fim do bloco
         bloco++;  
@@ -231,14 +257,18 @@ int main () {
     char *s = "@R@2@57444@1322;;335;;456@1620@19;21;6@0";
     int div;
     int cont;
-    int divs [7];
-    char **codsimb;
-    char *codigos = "01111111000111101101001101";
+    int divs [MAX];
+    //char codsimb[MAX][MAX];
 
-    //cont = calcular_codigos_SF(ex,t,0,7,divs,0);
+    //removeFreq(ex);
+    //printf("%ld",ex[8]);
+    calcular_codigos_SF(ex,t,0,7,divs,0);
+    //codigo_simbolo(t,divs,codsimb);
+    //strcpy(codsimb[0], "hello");
+    //printf("%s",codsimb[0]);
     //printf("%i\n", cont);
     //divs[cont] = '\0';
-    agrupar(codigos,divs,codsimb,8);
+    //agrupar(codigos,divs,codsimb,8);
     //printf("%i\n", divs[4]);
     //agrupar(t,ex,simb,0,7);
 
@@ -253,7 +283,7 @@ int main () {
 
     //freqsbloco(s,1,l);
     //int loop;   
-    //for(loop = 0; loop < 6; loop++) printf("%i ", divs[loop]);
+    //for(loop = 0; ex[loop] != '\0'; loop++) printf("%ld ", ex[loop]);
 
     return 0;
 }
