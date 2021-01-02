@@ -23,7 +23,7 @@ void ordena (long a[], int N) {
      }
 }
 
-//cria uma lista nova com os valores das freq de cada bloco e ordena-os por ordem decrescente
+//cria uma lista nova com os valores das freq de cada bloco
 void freqsbloco (char *freq, int ind, long l[]) { //indíce do bloco (número de @-1 a percorrer após os 4 primeiros)
     int a = (ind + 1)*2; //número de @ a percorrer 
     int i = 0; //percorrer os blocos
@@ -53,7 +53,6 @@ void freqsbloco (char *freq, int ind, long l[]) { //indíce do bloco (número de
         }
     }
     l[k] = '\0';
-    ordena(l,256); //número de símbolos é sempre 256
 }
 
 //remove as frequências iguais a 0
@@ -165,36 +164,76 @@ void *tamanhoB (char *freq, int ind, char *tam) {
     tam[k] = '\0';
 }
 
+
+int maior (long freq[]) {
+    int maior = 0;
+    int ind = 0;
+    int i;
+
+    for (i=0; freq[i]!='\0'; i++) {
+        if (freq[i]>maior) {
+            maior = freq[i];
+            ind = i;
+        }
+    }
+    return ind;
+}
+
+void atribiu_cod_simb (long freq[],char codesimb[MAX][MAX], char novo[MAX][MAX]) { //recebe o array com as freqs não ordenadas
+    int i = 0; //percorre codesimb
+    int j = 0; //percorre codesimb
+    int indMaior;
+
+    for(i=0; codesimb[i][0]!='\0'; i++) {
+        indMaior = maior(freq);
+        strcpy(novo[indMaior],codesimb[i]);
+
+        for(int n=indMaior; freq[n]!='\0'; n++) freq[n] = freq[n+1];
+    }
+}
+
 //função principal que retorna o conteúdo do ficheiro .cod
 char *cod (char *freq) {
     char *final; //string que vai ser retornada
     int k; //índice que percorre a lista final
     int i = 0;
     int b = 1; //indicador do bloco
+    int m;
     long bloco = 1;
     long l[257];
+    long r[257];
     char *t;
     char a = '@';
     char zero = '0';
+    char p = ';';
     char *codes;
     char *ptr;
     char codesimb[MAX][MAX];
+    char novo [MAX][MAX];
     int divs[MAX];
 
     while (i <= 4) final[k++] = freq[i++];
 
-    //ALGURES AQUI COLOCAR UMA FUNÇÃO PARA ADICONAR ; ENTRE OS CÓDIGOS E TER ATENÇÃO AOS CASOS QUE SÃO IGUAIS (;;) ??
-    //CASO A FREQUÊNCIA DOS SIMBOLOS SEJA 0 APARECE ;; NO FICHEIRO DE SAÍDA
+    //ATENÇÃO AOS CASOS QUE SÃO IGUAIS (;;) ??
     while (bloco <= strtol(freq+3, &ptr, 10)) { //repete o processo para todos os blocos
         tamanhoB (freq,bloco,t);
         strcat (final, t); //copiar o tam do bloco diretamente do ficheiro de entrada
         strncat (final,&a,1); //coloca um @ a seguir do tamanho do bloco
         freqsbloco (freq,bloco,l);
+        for (m=0; l[m]!='\0'; m++) r[m] = l[m];
+        r[m] = '\0';
+        ordena(l,256); //número de símbolos é sempre 256
         removeFreq (l); //remove as frequências iguais a 0
         calcular_codigos_SF(l,codes,0,255,divs,0);
         codigo_simbolo(codes,divs,codesimb);
-        //for (int j=0; codesimb[j]!='\0';j++) 
-        strcat (final, codes); //não vai ser bem a codes
+        atribiu_cod_simb(r,codesimb,novo);
+        for (int n=0; novo[n][0]!='\0'; n++) {
+            if (r[n] != 0) { //se não for um símbolo com freq = 0
+                strcat(final,novo[n]);
+                strncat(final,&p,1);       
+            }
+            else strncat(final,&p,1);
+        }
         strncat (final,&a,1); //coloca um @ no fim do bloco
         bloco++;  
     }
