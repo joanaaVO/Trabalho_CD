@@ -41,18 +41,18 @@ void freqsbloco (char *freq, int ind, long l[]) { //indíce do bloco (número de
     }
  
     for ( ; freq[i]!= '@'; i+=n) { //percorre o bloco
-        if (k != 0 && freq[i+1] != ';') i++; //se já não estiver na 1ºfrequência e se não for um caso ;; avança +1 para ficar no sítio onde começa a frequência
         n = 0;
-        if (freq[i+1] == ';') {
-            l[k++] = l[k-1]; //caso a frequência do valor em que nos encontramos seja igual à anterior (CASO ;;)
+        if (k != 0 && (freq[i+1] == ';' || freq[i+1] == '@')) { //caso a frequência do valor em que nos encontramos seja igual à anterior (CASO ;;)
+            l[k++] = l[k-1]; 
             n = 1; //anda 1 para a frente  
         }
         else {
+            if (k != 0) i++; //se já não estiver na 1ºfrequência
             for (j=i; freq[j]!=';' && freq[j]!='@'; j++) n++; //percorre cada frequência
             l[k++] = strtol (freq+i,&ptr,10);
         }
+        //printf("k: %i, %ld ", k-1, l[k-1]);
     }
-    l[k] = '\0';
 }
 
 //remove as frequências iguais a 0
@@ -63,6 +63,7 @@ void removeFreq (long ord[]) {
     for(i=0; ord[i]!='\0'; i++) {
         if (ord[i] != 0) ord[j++] = ord[i];
     }
+    ord[j] = '\0';
 }
 
 //calcula a soma das frequências entre dois índices
@@ -100,20 +101,21 @@ int calcular_codigos_SF(long ord[],char codes[],int start,int end,int divisoes[]
     char one = '1';
     if (start!=end) {
         div = calcular_melhor_divisao(ord,start,end);
-        printf("k antes: %i\n", k);
+        //printf("k antes: %i\n", k);
         divisoes[k++] = div;
-        printf("k depois: %i\n", k);
-        printf("div[k]: %i\n", divisoes[k-1]);
-        printf("div: %i\n", div);
+        //printf("k depois: %i\n", k);
+        //printf("div[k]: %i\n", divisoes[k-1]);
+        //printf("div: %i\n", div);
         for (i=0; i<=div-start; i++) strncat (codes, &zero, 1); //add_bit_to_code('0',codes,start,div);
         for (i=0; i<=end-(div+1); i++) strncat(codes, &one, 1); //add_bit_to_code('1',codes,div+1,end);
-        printf("%s\n", codes);
+        //printf("%s\n", codes);
         k = calcular_codigos_SF(ord,codes,start,div,divisoes,k);
         k = calcular_codigos_SF(ord,codes,div+1,end,divisoes,k);
     }
     return k;
 }
 
+//calcula os códigos de cada símbolo
 void codigo_simbolo (char cod[], int divs[], char codsimb[MAX][MAX]) {
     int i = 0; //percorre cod
     int z; //percorre cod para contar os zeros
@@ -142,11 +144,11 @@ void codigo_simbolo (char cod[], int divs[], char codsimb[MAX][MAX]) {
         }
         j++; //avança com o array das divs
     }
-    //for(int n=0; n<8; n++) printf("%s\n",codsimb[n]);
+    //for(int n=0; n<256; n++) printf("%s\n",codsimb[n]);
 }
 
 //coloca numa string 'tam' o tamanho de um dado bloco
-void *tamanhoB (char *freq, int ind, char *tam) {
+void *tamanhoB (char *freq, int ind, char tam[]) {
     int a = 2 * ind + 1; //num de @ que terá de passar
     int i = 0;
     int k = 0;
@@ -164,113 +166,190 @@ void *tamanhoB (char *freq, int ind, char *tam) {
     tam[k] = '\0';
 }
 
-
+//calcula a maior frequência
 int maior (long freq[]) {
-    int maior = 0;
+    long maior = 0;
     int ind = 0;
     int i;
+    int j;
 
-    for (i=0; freq[i]!='\0'; i++) {
-        if (freq[i]>maior) {
+    for (i=0; i<256; i++) {
+        if (freq[i]>maior) { 
             maior = freq[i];
-            ind = i;
-        }
+            ind = i; 
+        } 
     }
     return ind;
 }
 
+//atribui cada código ao respetivo símbolo
 void atribiu_cod_simb (long freq[],char codesimb[MAX][MAX], char novo[MAX][MAX]) { //recebe o array com as freqs não ordenadas
+    long temp[257];
+    int k;
+    for(k=0; k<256; k++) temp[k] = freq[k]; //guarda temporariamente o conteúdo de freq
+    temp[k] = '\0';
     int i = 0; //percorre codesimb
-    int j = 0; //percorre codesimb
-    int indMaior;
+    int indMaior = 0;
+
+    for (int l=0; l<MAX; l++) memset(novo[l], '\0', sizeof(novo[l])); //limpa a memória
+
+    //printf("hello\n");
 
     for(i=0; codesimb[i][0]!='\0'; i++) {
         indMaior = maior(freq);
-        strcpy(novo[indMaior],codesimb[i]);
-
-        for(int n=indMaior; freq[n]!='\0'; n++) freq[n] = freq[n+1];
+        //printf("indMaior: %i\n",indMaior);
+        if (freq[indMaior] > 0) {
+            strcpy(novo[indMaior],codesimb[i]);
+            freq[indMaior] = -1;
+            //printf("indMaior: %i\n",indMaior);
+        }
     }
+    for(k=0; k<256;k++) freq[k] = temp[k]; //devolve o conteúdo original a freq
+    freq[k] = '\0';
+    //for(int n=0; n<256; n++) printf("%s\n",novo[n]);
+
 }
 
 //função principal que retorna o conteúdo do ficheiro .cod
-char *cod (char *freq) {
-    char *final; //string que vai ser retornada
+void cod (char freq[], char final[]) {
+    //char *final; //string que vai ser retornada
     int k; //índice que percorre a lista final
     int i = 0;
     int b = 1; //indicador do bloco
     int m;
-    long bloco = 1;
+    int tam;
+    int arrobas = 3;
+    int bloco = 1;
     long l[257];
     long r[257];
-    char *t;
+    char t[30];
     char a = '@';
     char zero = '0';
     char p = ';';
-    char *codes;
+    char codes[10000];
     char *ptr;
+    int divs[MAX];
     char codesimb[MAX][MAX];
     char novo [MAX][MAX];
-    int divs[MAX];
 
-    while (i <= 4) final[k++] = freq[i++];
+    memset(final, '\0', strlen(final)); //limpa a memória
+    //memset(l,'\0',sizeof(l));
+    //memset(codes,'\0',sizeof(codes));
+    //memset(divs,'\0',sizeof(divs));
 
+    while (arrobas > 0) {
+        if (freq[i] == '@') arrobas--;
+        char c;
+        c = freq[i];
+        strncat(final,&c,1);
+        i++;
+    }
+
+    //i=0; ??
     //ATENÇÃO AOS CASOS QUE SÃO IGUAIS (;;) ??
     while (bloco <= strtol(freq+3, &ptr, 10)) { //repete o processo para todos os blocos
+        //printf("%i\n",bloco);
+        memset(codes,'\0',sizeof(codes));
+        memset(l,'\0',sizeof(l));
+        //memset(r,'\0',sizeof(r));
         tamanhoB (freq,bloco,t);
+        //printf("%s\n",t);
+        //printf("tirou o tam\n");
         strcat (final, t); //copiar o tam do bloco diretamente do ficheiro de entrada
         strncat (final,&a,1); //coloca um @ a seguir do tamanho do bloco
         freqsbloco (freq,bloco,l);
-        for (m=0; l[m]!='\0'; m++) r[m] = l[m];
+        //printf("fez freqsbloco\n");
+        //printf("%ld ", l[0]);
+        //for (int g=0; g<256; g++) printf("%ld ", l[g]);
+        for (m=0; m<256; m++) r[m] = l[m];
         r[m] = '\0';
+        //printf("%ld\n",l[0]);
+        //printf("%ld\n",r[0]);
+        //printf("copiou l para r\n");
         ordena(l,256); //número de símbolos é sempre 256
+        //for (int g=0; g<256; g++) printf("%ld ", l[g]);
+        //printf("ordenou\n");
         removeFreq (l); //remove as frequências iguais a 0
-        calcular_codigos_SF(l,codes,0,255,divs,0);
+        //for (int g=0; l[g]!='\0'; g++) printf("%ld ", l[g]);
+        //printf("removeu freqs\n");
+        //for (int g=0; l[g]!='\0'; g++) printf("%ld ", l[g]);
+        for (tam=0; l[tam]!='\0'; tam++);
+        //printf("%i\n",tam);
+        calcular_codigos_SF(l,codes,0,tam-1,divs,0);
+        //printf("calculou SF\n");
+        //printf("10\n");
+        //printf("%s\n",codes);
         codigo_simbolo(codes,divs,codesimb);
+        //printf("%s\n",codesimb[5]);
+        //printf("11\n");
+        //for (int g=0; g<256; g++) printf("%ld ", r[g]);
+        //for (int e=0; e<256; e++) printf("codesimb: %s\n", codesimb[e]);
         atribiu_cod_simb(r,codesimb,novo);
-        for (int n=0; novo[n][0]!='\0'; n++) {
-            if (r[n] != 0) { //se não for um símbolo com freq = 0
-                strcat(final,novo[n]);
-                strncat(final,&p,1);       
+        //printf("12\n");
+        //printf("%ld\n",r[0]);
+        //for (int h=0; h<256; h++) printf("novo: %s\n",novo[h]);
+        for (int n=0; n<256; n++) {
+            //printf("13\n");
+            //printf("%ld\n",r[0]);
+            //printf("%ld\n",r[n]);
+            if (n == 255) { //s estiver no último elemento
+                if (r[n] != 0) strcat(final,novo[n]);
             }
-            else strncat(final,&p,1);
+            else {
+                if (r[n] != 0) { //se não for um símbolo com freq = 0
+                    //printf("14\n");
+                    strcat(final,novo[n]);
+                    //printf("15\n");
+                    strncat(final,&p,1); 
+                    //printf("16\n");
+                }
+                else strncat(final,&p,1);
+                //printf("17\n");
+            }
         }
-        strncat (final,&a,1); //coloca um @ no fim do bloco
+        strncat (final,&a,1);
+        //printf("18\n"); //coloca um @ no fim do bloco
         bloco++;  
     }
     strncat(final,&zero,1); //adiciona o caracter "0" no fim
+    //printf("19\n");
+    printf("%s",final);
     //último caracter '\0' ?
+    //return final;
 }
 
-/*int main () {
+int main (int argc, char **argv) {
     FILE *fp;
     FILE *novo;
     char *command;
     char *filename;
+    strcpy(filename,argv[1]);
     int i;
     int j = 0;
-    char *saida;
+    char saida[10000];
     char *conteudo;
     char *ptr;
     clock_t start, end, total;
 
     start = clock();
 
-    scanf ("%s", command); 
+    /*scanf ("%s", command); 
 
     for (i=0; command[i]!=' '; i++); //percorre a palavra 'shafa'
     i++; //avança mais 1 para ficar no sítio onde começa o nome do ficheiro
     for( ; command[i]!=' '; i++) filename[j++] = command[i]; //retira o nome do ficheiro
     filename[j] = '\0';
+    */
     
     fp = fopen (filename, "r"); //abre o ficheiro .freq em modo de leitura (rb?)
-    fgets(conteudo, strlen(conteudo), filename); //retira a string que lá se encontra
+    fgets(conteudo, strlen(conteudo), fp); //retira a string que lá se encontra
 
-    saida = cod(conteudo); //executa o módulo
+    cod(conteudo,saida); //executa o módulo
     novo = fopen(strcat(filename,".cod"), "w"); //cria um novo ficheiro (.cod) (wb?)
     fprintf(novo, saida); //coloca no novo ficheiro a string resultante da execução do módulo
 
     end = clock();
-    total = (long int) ((end-start) / CLOCKS_PER_SEC) * 1000);
+    total = (long int) (((end-start) / CLOCKS_PER_SEC) * 1000);
 
     printf("Filipa Rebelo, a90234, Joana Oliveira, a87956, MIEI-CD, DATA\n");
     printf("Módulo: t (cálculo dos códigos dos símbolos)\n");
@@ -284,24 +363,34 @@ char *cod (char *freq) {
 
     return 0;
 }
-*/
+
                       
-int main () {
+/*int main () {
     long k;
     //long l[8] = {1/2,1/12,1/12,1/12,1/16,1/16,1/16,1/16};
-    long l[4] = {5,3,1,1};
+    //long l[4] = {5,3,1,1};
     long ex[8] = {24,4,4,4,3,3,3,3};
-    char *t;
-    char *simb;
-    char *s = "@R@2@57444@1322;;335;;456@1620@19;21;6@0";
+    char t[MAX];
+    long l[257];
+    char *s ;
     int div;
     int cont;
-    int divs [MAX];
+    int divs[MAX];
+    char final[10000];
     //char codsimb[MAX][MAX];
+
+    //memset(t,'\0',sizeof(t));
+
+    //freqsbloco(s,1,l);
+    //ordena(l,5);
+    //printf("%ld",l[7]);
+    //calcular_codigos_SF(l,t,0,4,divs,0);
+    cod(s,final);
+    //printf("%s\n",final);
 
     //removeFreq(ex);
     //printf("%ld",ex[8]);
-    calcular_codigos_SF(ex,t,0,7,divs,0);
+    //calcular_codigos_SF(ex,t,0,7,divs,0);
     //codigo_simbolo(t,divs,codsimb);
     //strcpy(codsimb[0], "hello");
     //printf("%s",codsimb[0]);
@@ -326,3 +415,4 @@ int main () {
 
     return 0;
 }
+*/
