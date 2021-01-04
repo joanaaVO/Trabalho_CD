@@ -75,6 +75,7 @@ long sum (long v[], int inicio, int fim) {
     return soma;
 }
 
+//calcula a melhor divisão das frequências
 int calcular_melhor_divisao (long ord[],int i,int j) {
     int div = i;
     long total,mindif,dif;
@@ -198,22 +199,20 @@ void atribiu_cod_simb (long freq[],char codesimb[MAX][MAX], char novo[MAX][MAX])
 
 //função principal que retorna o conteúdo do ficheiro .cod
 void cod (char freq[], char final[]) {
-    int k; //índice que percorre a lista final
     int i = 0;
-    int b = 1; //indicador do bloco
     int m;
     int tam;
     int arrobas = 3;
-    int bloco = 1;
+    int bloco = 1; //indicador do bloco
     long l[257];
     long r[257];
     char t[30];
     char a = '@';
     char zero = '0';
     char p = ';';
-    char codes[10000];
+    char codes[20000];
     char *ptr;
-    int divs[MAX];
+    int divs[3000];
     char codesimb[MAX][MAX];
     char novo [MAX][MAX];
 
@@ -227,8 +226,6 @@ void cod (char freq[], char final[]) {
         i++;
     }
 
-    //i=0; ??
-    //ATENÇÃO AOS CASOS QUE SÃO IGUAIS (;;) ??
     while (bloco <= strtol(freq+3, &ptr, 10)) { //repete o processo para todos os blocos
         memset(codes,'\0',sizeof(codes));
         memset(l,'\0',sizeof(l));
@@ -236,16 +233,16 @@ void cod (char freq[], char final[]) {
         strcat (final, t); //copiar o tam do bloco diretamente do ficheiro de entrada
         strncat (final,&a,1); //coloca um @ a seguir do tamanho do bloco
         freqsbloco (freq,bloco,l);
-        for (m=0; m<256; m++) r[m] = l[m];
+        for (m=0; m<256; m++) r[m] = l[m]; //guarda em r as frequências do bloco não ordenadas descrescentemente
         r[m] = '\0';
-        ordena(l,256); //número de símbolos é sempre 256
+        ordena(l,256);
         removeFreq (l); //remove as frequências iguais a 0
         for (tam=0; l[tam]!='\0'; tam++);
         calcular_codigos_SF(l,codes,0,tam-1,divs,0);
         codigo_simbolo(codes,divs,codesimb);
         atribiu_cod_simb(r,codesimb,novo);
-        for (int n=0; n<256; n++) {
-            if (n == 255) { //s estiver no último elemento
+        for (int n=0; n<256; n++) { //coloca os símbolos na ordem correta de acordo com as frequências
+            if (n == 255) { //se estiver no último elemento
                 if (r[n] != 0) strcat(final,novo[n]);
             }
             else {
@@ -273,8 +270,8 @@ int main (int argc, char **argv) {
     char newfile[MAX];
     char tam[MAX];
     char tam_total[MAX];
-    char saida[10000];
-    char conteudo[10000];
+    static char saida[500000];
+    static char conteudo[200000];
     char *ptr;
     clock_t start, end, total;
 
@@ -290,7 +287,7 @@ int main (int argc, char **argv) {
     start = clock();
 
     fp = fopen (filename, "r"); //abre o ficheiro .freq em modo de leitura
-    fread(conteudo,sizeof(char), sizeof(filename),fp);
+    fread(conteudo,sizeof(char),150000,fp);
 
     cod(conteudo,saida); //executa o módulo
 
@@ -326,7 +323,7 @@ int main (int argc, char **argv) {
 
     printf("Filipa Rebelo, a90234, Joana Oliveira, a87956, MIEI-CD, %s\n", data);
     printf("Modulo: t (calculo dos codigos dos simbolos)\n");
-    printf("Numero de blocos: %ld\n", strtol(conteudo+3,&ptr,10));
+    printf("Numero de blocos: %ld\n", n_blocks);
     printf("Tamanho dos blocos analisados no ficheiro de simbolos: %s bytes\n", tam_total);
     printf("Tempo de execucao do modulo (milissegundos): %lu\n", total);
     printf("Ficheiro gerado: %s", newfile); 
