@@ -267,26 +267,23 @@ int main (int argc, char **argv) {
     FILE *novo;
     char filename[MAX];
     strcpy(filename,argv[1]);
-    printf("%s\n",filename);
+    //printf("%s\n",filename);
     char saida[10000];
     char conteudo[10000];
     char *ptr;
     clock_t start, end, total;
 
-    /*if (argc != 4 || argv[2]!="-m" || argv[3]!="t") {
-        printf("Comando inválido!");
-        return -1;
-    } 
-    */
-
     start = clock();
-    printf("hello\n");
+
+    //fp = fopen("C:\\Users\\joana\\OneDrive\\Documentos\\GitHub\\Trabalho_CD\\aaa.text.freq","rb");
     
-    fp = fopen (filename, "rb"); //abre o ficheiro .freq em modo de leitura
-    fgets(conteudo, strlen(conteudo), fp); //retira a string que lá se encontra
+    fp = fopen (filename, "r"); //abre o ficheiro .freq em modo de leitura
+    fread(conteudo,sizeof(char), sizeof(filename),fp);
+
+    //printf("%s\n",conteudo);
 
     cod(conteudo,saida); //executa o módulo
-    novo = fopen(strcat(filename,".cod"), "wb"); //cria um novo ficheiro (.cod)
+    novo = fopen(strcat(filename,".cod"), "w"); //cria um novo ficheiro (.cod)
     fputs(saida,novo); //coloca no novo ficheiro a string resultante da execução do módulo
 
     end = clock();
