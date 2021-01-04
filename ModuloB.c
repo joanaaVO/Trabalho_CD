@@ -265,92 +265,74 @@ void cod (char freq[], char final[]) {
 int main (int argc, char **argv) {
     FILE *fp;
     FILE *novo;
+    int bloco = 1;
+    int p = 0; 
+    int j = 0;
+    char c = '/';
     char filename[MAX];
-    strcpy(filename,argv[1]);
-    //printf("%s\n",filename);
+    char newfile[MAX];
+    char tam[MAX];
+    char tam_total[MAX];
     char saida[10000];
     char conteudo[10000];
     char *ptr;
     clock_t start, end, total;
 
+    memset(tam, '\0', strlen(tam));
+    memset(tam_total, '\0', strlen(tam_total));
+
+    time_t tempo = time(NULL);
+    char * data = ctime(&tempo);
+    data[strlen(data)-1] = '\0';
+
+    strcpy(filename,argv[1]);
+
     start = clock();
 
-    //fp = fopen("C:\\Users\\joana\\OneDrive\\Documentos\\GitHub\\Trabalho_CD\\aaa.text.freq","rb");
-    
     fp = fopen (filename, "r"); //abre o ficheiro .freq em modo de leitura
     fread(conteudo,sizeof(char), sizeof(filename),fp);
 
-    //printf("%s\n",conteudo);
-
     cod(conteudo,saida); //executa o módulo
-    novo = fopen(strcat(filename,".cod"), "w"); //cria um novo ficheiro (.cod)
+
+    long n_blocks = strtol(conteudo+3, &ptr, 10);
+    while (bloco <= n_blocks) {
+        if (bloco < n_blocks) {
+            tamanhoB(conteudo, bloco, tam);
+            strcat(tam_total,tam);
+            strncat(tam_total,&c,1);
+        }
+        else {
+            tamanhoB(conteudo, bloco, tam);
+            strcat(tam_total,tam);
+        }
+        bloco++;
+    }
+
+    for (int n=0; filename[n]!='\0'; n++) {
+        if (filename[n] == '.') p++;
+    }
+
+    for (int i=0; filename[i]!='\0' && p>0; i++) {
+        if (filename[i] == '.') p--;
+        newfile[j++] = filename[i];
+        }
+        newfile[j] = '\0';
+
+    novo = fopen(strcat(newfile,"cod"), "w"); //cria um novo ficheiro (.cod)
     fputs(saida,novo); //coloca no novo ficheiro a string resultante da execução do módulo
 
     end = clock();
-    total = (long int) (((end-start) / CLOCKS_PER_SEC) * 1000);
+    total = 1000*(double)(end - start) / (double)CLOCKS_PER_SEC;
 
-    printf("Filipa Rebelo, a90234, Joana Oliveira, a87956, MIEI-CD, DATA\n");
+    printf("Filipa Rebelo, a90234, Joana Oliveira, a87956, MIEI-CD, %s\n", data);
     printf("Modulo: t (calculo dos codigos dos simbolos)\n");
-    printf("Numero de blocos: \n", strtol(conteudo+3,&ptr,10));
-    printf("Tamanho dos blocos analisados no ficheiro de simbolos: %s bytes\n");
+    printf("Numero de blocos: %ld\n", strtol(conteudo+3,&ptr,10));
+    printf("Tamanho dos blocos analisados no ficheiro de simbolos: %s bytes\n", tam_total);
     printf("Tempo de execucao do modulo (milissegundos): %lu\n", total);
-    printf("Ficheiro gerado: %s", filename); 
+    printf("Ficheiro gerado: %s", newfile); 
 
     fclose(fp);
     fclose(novo);
 
     return 0;
 }
-
-                      
-/*int main () {
-    long k;
-    //long l[8] = {1/2,1/12,1/12,1/12,1/16,1/16,1/16,1/16};
-    //long l[4] = {5,3,1,1};
-    long ex[8] = {24,4,4,4,3,3,3,3};
-    char t[MAX];
-    long l[257];
-    char *s ;
-    int div;
-    int cont;
-    int divs[MAX];
-    char final[10000];
-    //char codsimb[MAX][MAX];
-
-    //memset(t,'\0',sizeof(t));
-
-    //freqsbloco(s,1,l);
-    //ordena(l,5);
-    //printf("%ld",l[7]);
-    //calcular_codigos_SF(l,t,0,4,divs,0);
-    cod(s,final);
-    //printf("%s\n",final);
-
-    //removeFreq(ex);
-    //printf("%ld",ex[8]);
-    //calcular_codigos_SF(ex,t,0,7,divs,0);
-    //codigo_simbolo(t,divs,codsimb);
-    //strcpy(codsimb[0], "hello");
-    //printf("%s",codsimb[0]);
-    //printf("%i\n", cont);
-    //divs[cont] = '\0';
-    //agrupar(codigos,divs,codsimb,8);
-    //printf("%i\n", divs[4]);
-    //agrupar(t,ex,simb,0,7);
-
-    //tamanhoB(s,2,t);
-    //printf("%s\n",t);
-
-    //div = calcular_melhor_divisao(l,0,3);
-    //printf("Div: %i\n", div); 
-  
-    // print string 
-    //printf("Appended String: %s\n", str); 
-
-    //freqsbloco(s,1,l);
-    //int loop;   
-    //for(loop = 0; ex[loop] != '\0'; loop++) printf("%ld ", ex[loop]);
-
-    return 0;
-}
-*/
